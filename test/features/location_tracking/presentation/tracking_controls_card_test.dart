@@ -26,6 +26,8 @@ void main() {
   testWidgets('shows a single Settings app button on iOS', (tester) async {
     await tester.pumpWidget(buildSubject(isIos: true));
 
+    expect(find.text('Sample interval'), findsNothing);
+    expect(find.text('Distance filter'), findsOneWidget);
     expect(find.text('Open Settings app'), findsOneWidget);
     expect(find.text('Open location settings'), findsNothing);
     expect(find.text('Open app settings'), findsNothing);
@@ -34,6 +36,8 @@ void main() {
   testWidgets('keeps separate settings buttons on Android', (tester) async {
     await tester.pumpWidget(buildSubject(isIos: false));
 
+    expect(find.text('Sample interval'), findsOneWidget);
+    expect(find.text('Distance filter'), findsOneWidget);
     expect(find.text('Open location settings'), findsOneWidget);
     expect(find.text('Open app settings'), findsOneWidget);
     expect(find.text('Open Settings app'), findsNothing);

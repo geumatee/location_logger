@@ -107,64 +107,46 @@ class TrackingControlsCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    initialValue: state.sampleIntervalSeconds,
-                    decoration: const InputDecoration(
+            if (isIos)
+              _TrackingSettingDropdown(
+                labelText: 'Distance filter',
+                suffixText: 'm',
+                value: state.distanceFilterMeters,
+                options: _distanceFilterOptions,
+                enabled: !state.isLoading,
+                onChanged: onDistanceFilterChanged,
+              )
+            else
+              Row(
+                children: [
+                  Expanded(
+                    child: _TrackingSettingDropdown(
                       labelText: 'Sample interval',
                       suffixText: 'sec',
+                      value: state.sampleIntervalSeconds,
+                      options: _sampleIntervalOptions,
+                      enabled: !state.isLoading,
+                      onChanged: onSampleIntervalChanged,
                     ),
-                    items: _sampleIntervalOptions
-                        .map(
-                          (seconds) => DropdownMenuItem<int>(
-                            value: seconds,
-                            child: Text('$seconds'),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: state.isLoading
-                        ? null
-                        : (value) {
-                            if (value != null &&
-                                value != state.sampleIntervalSeconds) {
-                              onSampleIntervalChanged(value);
-                            }
-                          },
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    initialValue: state.distanceFilterMeters,
-                    decoration: const InputDecoration(
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _TrackingSettingDropdown(
                       labelText: 'Distance filter',
                       suffixText: 'm',
+                      value: state.distanceFilterMeters,
+                      options: _distanceFilterOptions,
+                      enabled: !state.isLoading,
+                      onChanged: onDistanceFilterChanged,
                     ),
-                    items: _distanceFilterOptions
-                        .map(
-                          (meters) => DropdownMenuItem<int>(
-                            value: meters,
-                            child: Text('$meters'),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: state.isLoading
-                        ? null
-                        : (value) {
-                            if (value != null &&
-                                value != state.distanceFilterMeters) {
-                              onDistanceFilterChanged(value);
-                            }
-                          },
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             const SizedBox(height: 8),
             Text(
-              'Changes are saved immediately. If tracking is active, the stream restarts with the new interval and distance filter.',
+              isIos
+                  ? 'Changes are saved immediately. If tracking is active, the stream restarts with the new distance filter.'
+                  : 'Changes are saved immediately. If tracking is active, the stream restarts with the new interval and distance filter.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -250,5 +232,49 @@ class TrackingControlsCard extends StatelessWidget {
     }
 
     return 'Background-capable tracking will be used the next time tracking runs.';
+  }
+}
+
+class _TrackingSettingDropdown extends StatelessWidget {
+  const _TrackingSettingDropdown({
+    required this.labelText,
+    required this.suffixText,
+    required this.value,
+    required this.options,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final String labelText;
+  final String suffixText;
+  final int value;
+  final List<int> options;
+  final bool enabled;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<int>(
+      initialValue: value,
+      decoration: InputDecoration(
+        labelText: labelText,
+        suffixText: suffixText,
+      ),
+      items: options
+          .map(
+            (option) => DropdownMenuItem<int>(
+              value: option,
+              child: Text('$option'),
+            ),
+          )
+          .toList(),
+      onChanged: enabled
+          ? (selectedValue) {
+              if (selectedValue != null && selectedValue != value) {
+                onChanged(selectedValue);
+              }
+            }
+          : null,
+    );
   }
 }
